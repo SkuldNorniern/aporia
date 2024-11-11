@@ -1,4 +1,4 @@
-use alea::{backend::LCG, Rng};
+use aporia::{backend::LCG, Rng};
 
 fn main() {
     let backend = LCG::new(12345);

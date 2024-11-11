@@ -1,4 +1,4 @@
-use alea::{backend::PCG, Rng};
+use aporia::{backend::PCG, Rng};
 
 fn main() {
     let backend = PCG::new(12345, 1);

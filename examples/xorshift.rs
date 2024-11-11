@@ -1,4 +1,4 @@
-use alea::{backend::XorShift, Rng};
+use aporia::{backend::XorShift, Rng};
 
 fn main() {
     let backend = XorShift::new(12345);

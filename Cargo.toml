@@ -1,13 +1,13 @@
 [package]
-name = "alea"
+name = "aporia"
 version = "0.1.0"
 edition = "2021"
 description = "A flexible random number generation library"
 license = "MIT"
-repository = "https://github.com/SkuldNorniern/alea"
+repository = "https://github.com/SkuldNorniern/aporia"
 
 [lib]
-name = "alea"
+name = "aporia"
 path = "src/lib.rs"
 
 [dependencies]

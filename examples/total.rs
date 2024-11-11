@@ -1,4 +1,4 @@
-use alea::{
+use aporia::{
     backend::{MT19937_64, PCG, XorShift, LCG, SplitMix64, Xoshiro256StarStar},
     Rng,
 };
