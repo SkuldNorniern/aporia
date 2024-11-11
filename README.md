@@ -1,9 +1,8 @@
-# Alea
+# Aporia
 
-**Alea** is a Rust library that provides implementations of various random number generators (RNGs). With **Alea**, the die is cast—bringing randomness to your Rust projects!
+**Aporia** is a Rust library that provides implementations of various random number generators (RNGs). With **Aporia**, the die is cast—bringing randomness to your Rust projects!
 
-> *"Alea iacta est"* — Julius Caesar  
-> *"Alea library est"* — You, when you choose Alea for your RNG needs
+> Aporia (ἀπορία): A Greek term meaning "difficulty," "perplexity," or "impasse," reflecting the unpredictable and puzzling nature of randomness.
 
 ## Features
 
@@ -19,11 +18,11 @@
 
 ## Installation
 
-Add Alea to your `Cargo.toml`:
+Add Aporia to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-alea = "0.1.0"
+aporia = "0.1.0"
 ```
 
 Then run:
@@ -34,10 +33,10 @@ cargo build
 
 ## Usage
 
-Here's how to use different RNG backends with Alea:
+Here's how to use different RNG backends with Aporia:
 
 ```rust
-use alea::{
+use aporia::{
     backend::{LCG, MT19937_64, PCG, SplitMix64, XorShift, Xoshiro256StarStar},
     Rng,
 };
@@ -121,4 +120,4 @@ For any questions or suggestions, feel free to contact the project maintainer.
 
 ---
 
-With **Alea**, take a chance on randomness—you won't have to roll the dice on reliability!
+With **Aporia**, take a chance on randomness—you won't have to roll the dice on reliability!
