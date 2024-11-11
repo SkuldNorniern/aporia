@@ -1,11 +1,44 @@
+//! 64-bit Mersenne Twister (MT19937-64) implementation.
+//!
+//! The Mersenne Twister is a pseudorandom number generator with an extremely long period
+//! of 2<sup>19937</sup>−1. This 64-bit variant is known for its high quality and speed
+//! in generating random numbers.
+//!
+//! # Characteristics
+//!
+//! - State size: 2.5 KB (312 * 8 bytes)
+//! - Period: 2<sup>19937</sup>−1
+//! - Speed: Moderate
+//! - Quality: High
+//!
+//! # Example
+//!
+//! ```rust
+//! use alea::{Rng, backend::MT19937_64};
+//!
+//! let backend = MT19937_64::new(5489); // Default seed from reference implementation
+//! let mut rng = Rng::new(backend);
+//! let random_number = rng.next_u64();
+//! ```
+//!
+//! # References
+//!
+//! - [Mutsuo Saito and Makoto Matsumoto - MT19937-64 C code](https://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt64.html)
+//! - [Wikipedia: Mersenne Twister](https://en.wikipedia.org/wiki/Mersenne_Twister)
 use super::RandomBackend;
 
+/// 64-bit Mersenne Twister (MT19937-64) struct.
 pub struct MT19937_64 {
     mt: [u64; 312],
     index: usize,
 }
 
 impl MT19937_64 {
+    /// Creates a new `MT19937_64` instance with the given seed.
+    ///
+    /// # Arguments
+    ///
+    /// * `seed` - The initial seed value.
     pub fn new(seed: u64) -> Self {
         let mut mt = [0u64; 312];
         mt[0] = seed;
@@ -19,6 +52,7 @@ impl MT19937_64 {
         Self { mt, index: 312 }
     }
     
+    /// Performs the twist operation to update the state of the MT19937-64 generator.
     fn twist(&mut self) {
         const LOWER_MASK: u64 = (1u64 << 31) - 1;
         const UPPER_MASK: u64 = !LOWER_MASK;
@@ -39,6 +73,7 @@ impl MT19937_64 {
 }
 
 impl RandomBackend for MT19937_64 {
+    /// Generates the next 64-bit unsigned integer.
     fn next_u64(&mut self) -> u64 {
         if self.index >= 312 {
             self.twist();
