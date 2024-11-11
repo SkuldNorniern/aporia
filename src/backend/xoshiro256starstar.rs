@@ -46,8 +46,8 @@ impl Xoshiro256StarStar {
         let mut state = SplitMix64::new(seed);
         let mut s = [0u64; 4];
 
-        for i in 0..4 {
-            s[i] = state.next_u64();
+        for x in s.iter_mut().take(4) {
+            *x = state.next_u64();
         }
 
         Self { s }

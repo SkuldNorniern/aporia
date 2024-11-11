@@ -72,6 +72,6 @@ mod tests {
         assert!(val != 0);
 
         let float = rng.next_f64();
-        assert!(float >= 0.0 && float < 1.0);
+        assert!((0.0..1.0).contains(&float));
     }
 }
