@@ -3,7 +3,7 @@ name = "aporia"
 version = "0.2.0"
 edition = "2024"
 description = "A flexible random number generation library"
-license = "MIT"
+license = "Apache-2.0"
 repository = "https://github.com/SkuldNorniern/aporia"
 
 [lib]
