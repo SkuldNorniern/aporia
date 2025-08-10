@@ -1,3 +1,4 @@
+#![cfg_attr(not(feature = "std"), no_std)]
 //! Alea: A flexible random number generation library
 //! 
 //! This crate provides a modular and extensible framework for random number generation
@@ -90,6 +91,7 @@ impl core::fmt::Display for AporiaError {
     }
 }
 
+#[cfg(feature = "std")]
 impl std::error::Error for AporiaError {}
 
 #[cfg(test)]
