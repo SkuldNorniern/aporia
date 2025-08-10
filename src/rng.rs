@@ -58,4 +58,58 @@ impl<B: RandomBackend> Rng<B> {
     pub fn next_f64(&mut self) -> f64 {
         self.backend.next_f64()
     }
+
+    /// Generates a random number within the given range.
+    ///
+    /// # Arguments
+    ///
+    /// * `min` - The inclusive lower bound
+    /// * `max` - The exclusive upper bound
+    ///
+    /// # Returns
+    ///
+    /// A randomly generated number within the range [min, max)
+    ///
+    /// # Panics
+    ///
+    /// Panics if `min >= max`
+    pub fn gen_range(&mut self, min: u64, max: u64) -> u64 {
+        if min >= max {
+            panic!("min must be less than max");
+        }
+        
+        let range = max - min;
+        let mut rand = self.next_u64();
+        
+        // Modulo bias correction
+        let threshold = (u64::MAX - range + 1) % range;
+        while rand < threshold {
+            rand = self.next_u64();
+        }
+        
+        min + (rand % range)
+    }
+
+    /// Generates a random floating-point number within the given range.
+    ///
+    /// # Arguments
+    ///
+    /// * `min` - The inclusive lower bound
+    /// * `max` - The exclusive upper bound
+    ///
+    /// # Returns
+    ///
+    /// A randomly generated f64 value within the range [min, max)
+    ///
+    /// # Panics
+    ///
+    /// Panics if `min >= max`
+    pub fn gen_range_f64(&mut self, min: f64, max: f64) -> f64 {
+        if min >= max {
+            panic!("min must be less than max");
+        }
+        
+        let rand = self.next_f64();
+        min + (rand * (max - min))
+    }
 }
