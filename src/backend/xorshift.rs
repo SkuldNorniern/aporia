@@ -28,6 +28,7 @@
 use super::RandomBackend;
 
 /// XorShift random number generator struct.
+#[derive(Clone, Debug)]
 pub struct XorShift {
     state: u64,
 }

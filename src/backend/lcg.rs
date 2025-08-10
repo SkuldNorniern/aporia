@@ -28,6 +28,7 @@
 use super::RandomBackend;
 
 /// Linear Congruential Generator (LCG) struct.
+#[derive(Clone, Debug)]
 pub struct LCG {
     state: u64,
 }

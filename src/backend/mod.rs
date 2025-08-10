@@ -89,6 +89,8 @@ pub trait RandomBackend {
     /// Generates the next 64-bit unsigned integer.
     ///
     /// This is the core method that must be implemented by all backends.
+    #[inline]
+    #[must_use]
     fn next_u64(&mut self) -> u64;
 
     /// Generates a random floating-point number in the range [0, 1).
@@ -98,10 +100,38 @@ pub trait RandomBackend {
     ///
     /// Using the upper 53 bits ensures the value is in [0, 1) and matches the
     /// precision of `f64` mantissa, avoiding the possibility of returning 1.0.
+    #[inline]
+    #[must_use]
     fn next_f64(&mut self) -> f64 {
         // Take the top 53 bits to construct an f64 in [0, 1).
         // 53 is the number of mantissa bits in an f64.
         let val = self.next_u64() >> 11; // 64 - 53
         (val as f64) * (1.0 / ((1u64 << 53) as f64))
+    }
+
+    /// Generates the next 32-bit unsigned integer.
+    ///
+    /// Default implementation returns the upper 32 bits of `next_u64()`.
+    #[inline]
+    #[must_use]
+    fn next_u32(&mut self) -> u32 {
+        (self.next_u64() >> 32) as u32
+    }
+
+    /// Fills `buf` with random bytes using repeated `next_u64()` calls.
+    #[inline]
+    fn fill_bytes(&mut self, buf: &mut [u8]) {
+        let mut i = 0;
+        let len = buf.len();
+        while i + 8 <= len {
+            let v = self.next_u64().to_ne_bytes();
+            buf[i..i + 8].copy_from_slice(&v);
+            i += 8;
+        }
+        if i < len {
+            let v = self.next_u64().to_ne_bytes();
+            let rem = len - i;
+            buf[i..].copy_from_slice(&v[..rem]);
+        }
     }
 }

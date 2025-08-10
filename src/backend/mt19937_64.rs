@@ -102,3 +102,12 @@ mod tests {
         assert_ne!(a, b);
     }
 }
+
+impl core::fmt::Debug for MT19937_64 {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        // Avoid dumping large internal state; show only minimal info.
+        f.debug_struct("MT19937_64")
+            .field("index", &self.index)
+            .finish()
+    }
+}

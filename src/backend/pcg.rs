@@ -28,6 +28,7 @@
 use super::RandomBackend;
 
 /// Permuted Congruential Generator (PCG) struct.
+#[derive(Clone, Debug)]
 pub struct PCG {
     state: u64,
     increment: u64,

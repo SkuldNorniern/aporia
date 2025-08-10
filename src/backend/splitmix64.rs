@@ -28,6 +28,7 @@
 use super::RandomBackend;
 
 /// SplitMix64 random number generator struct.
+#[derive(Clone, Debug)]
 pub struct SplitMix64 {
     state: u64,
 }

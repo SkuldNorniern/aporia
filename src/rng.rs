@@ -32,6 +32,7 @@ impl<B: RandomBackend> Rng<B> {
     /// # Arguments
     ///
     /// * `backend` - The RNG backend to use
+    #[inline]
     pub fn new(backend: B) -> Self {
         Self { backend }
     }
@@ -41,6 +42,8 @@ impl<B: RandomBackend> Rng<B> {
     /// # Returns
     ///
     /// A randomly generated `u64` value
+    #[inline]
+    #[must_use]
     pub fn next_u64(&mut self) -> u64 {
         self.backend.next_u64()
     }
@@ -50,8 +53,32 @@ impl<B: RandomBackend> Rng<B> {
     /// # Returns
     ///
     /// A randomly generated `f64` value between 0 (inclusive) and 1 (exclusive)
+    #[inline]
+    #[must_use]
     pub fn next_f64(&mut self) -> f64 {
         self.backend.next_f64()
+    }
+
+    /// Generates the next 32-bit unsigned integer.
+    #[inline]
+    #[must_use]
+    pub fn next_u32(&mut self) -> u32 {
+        self.backend.next_u32()
+    }
+
+    /// Generates the next 32-bit floating point number in [0, 1).
+    #[inline]
+    #[must_use]
+    pub fn next_f32(&mut self) -> f32 {
+        let val = (self.backend.next_u64() >> 40) as u32; // top 24 bits
+        (val as f32) * (1.0 / ((1u32 << 24) as f32))
+    }
+
+    /// Generates a random boolean with p=0.5.
+    #[inline]
+    #[must_use]
+    pub fn next_bool(&mut self) -> bool {
+        (self.backend.next_u64() & 1) != 0
     }
 
     /// Generates a random number within the given range.
@@ -68,21 +95,20 @@ impl<B: RandomBackend> Rng<B> {
     /// # Panics
     ///
     /// Panics if `min >= max`
+    #[inline]
+    #[must_use]
     pub fn gen_range(&mut self, min: u64, max: u64) -> u64 {
         if min >= max {
             panic!("min must be less than max");
         }
-        
         let range = max - min;
-        let mut rand = self.next_u64();
-        
-        // Modulo bias correction
-        let threshold = (u64::MAX - range + 1) % range;
-        while rand < threshold {
-            rand = self.next_u64();
+        let zone = u64::MAX - (u64::MAX % range);
+        loop {
+            let v = self.next_u64();
+            if v < zone {
+                return min + (v % range);
+            }
         }
-        
-        min + (rand % range)
     }
 
     /// Generates a random floating-point number within the given range.
@@ -99,6 +125,8 @@ impl<B: RandomBackend> Rng<B> {
     /// # Panics
     ///
     /// Panics if `min >= max`
+    #[inline]
+    #[must_use]
     pub fn gen_range_f64(&mut self, min: f64, max: f64) -> f64 {
         if min >= max {
             panic!("min must be less than max");
@@ -106,6 +134,12 @@ impl<B: RandomBackend> Rng<B> {
         
         let rand = self.next_f64();
         min + (rand * (max - min))
+    }
+
+    /// Fills `buf` with random bytes from the backend.
+    #[inline]
+    pub fn fill_bytes(&mut self, buf: &mut [u8]) {
+        self.backend.fill_bytes(buf)
     }
 }
 
@@ -162,5 +196,15 @@ mod tests {
             let x = rng.gen_range_f64(0.5, 1.5);
             assert!(x >= 0.5 && x < 1.5);
         }
+    }
+
+    #[test]
+    fn next_u32_and_f32_and_bool_work() {
+        let backend = XorShift::new(7);
+        let mut rng = Rng::new(backend);
+        let _u32v = rng.next_u32();
+        let f = rng.next_f32();
+        assert!(f >= 0.0 && f < 1.0);
+        let _b = rng.next_bool();
     }
 }

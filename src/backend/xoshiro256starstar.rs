@@ -29,6 +29,7 @@ use super::RandomBackend;
 use crate::backend::SplitMix64;
 
 /// Xoshiro256\*\* random number generator struct.
+#[derive(Clone, Debug)]
 pub struct Xoshiro256StarStar {
     s: [u64; 4],
 }
