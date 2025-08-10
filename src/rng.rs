@@ -109,6 +109,26 @@ impl<B: RandomBackend> Rng<B> {
     }
 }
 
+impl<B> Clone for Rng<B>
+where
+    B: RandomBackend + Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            backend: self.backend.clone(),
+        }
+    }
+}
+
+impl<B> core::fmt::Debug for Rng<B>
+where
+    B: RandomBackend + core::fmt::Debug,
+{
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        f.debug_struct("Rng").field("backend", &self.backend).finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
