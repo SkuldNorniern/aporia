@@ -113,3 +113,39 @@ impl<B: RandomBackend> Rng<B> {
         min + (rand * (max - min))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::backend::{XorShift, SplitMix64};
+
+    #[test]
+    fn next_f64_in_unit_interval() {
+        let backend = XorShift::new(1);
+        let mut rng = Rng::new(backend);
+        for _ in 0..1000 {
+            let x = rng.next_f64();
+            assert!(x >= 0.0 && x < 1.0);
+        }
+    }
+
+    #[test]
+    fn gen_range_integral_bounds() {
+        let backend = SplitMix64::new(123);
+        let mut rng = Rng::new(backend);
+        for _ in 0..1000 {
+            let x = rng.gen_range(10, 20);
+            assert!((10..20).contains(&x));
+        }
+    }
+
+    #[test]
+    fn gen_range_f64_bounds() {
+        let backend = SplitMix64::new(123);
+        let mut rng = Rng::new(backend);
+        for _ in 0..1000 {
+            let x = rng.gen_range_f64(0.5, 1.5);
+            assert!(x >= 0.5 && x < 1.5);
+        }
+    }
+}

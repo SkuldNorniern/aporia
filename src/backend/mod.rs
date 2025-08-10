@@ -94,9 +94,14 @@ pub trait RandomBackend {
     /// Generates a random floating-point number in the range [0, 1).
     ///
     /// This method has a default implementation that converts the result
-    /// of `next_u64()` to a floating-point number.
+    /// of `next_u64()` to a floating-point number using the upper 53 bits.
+    ///
+    /// Using the upper 53 bits ensures the value is in [0, 1) and matches the
+    /// precision of `f64` mantissa, avoiding the possibility of returning 1.0.
     fn next_f64(&mut self) -> f64 {
-        let val = self.next_u64();
-        (val as f64) / (u64::MAX as f64)
+        // Take the top 53 bits to construct an f64 in [0, 1).
+        // 53 is the number of mantissa bits in an f64.
+        let val = self.next_u64() >> 11; // 64 - 53
+        (val as f64) * (1.0 / ((1u64 << 53) as f64))
     }
 }

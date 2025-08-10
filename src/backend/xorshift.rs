@@ -59,3 +59,25 @@ impl RandomBackend for XorShift {
         x
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn xorshift_basic_sequence_nonzero() {
+        let mut backend = XorShift::new(1);
+        // XorShift with non-zero seed should not produce zero immediately
+        let v1 = backend.next_u64();
+        let v2 = backend.next_u64();
+        assert_ne!(v1, 0);
+        assert_ne!(v2, 0);
+        assert_ne!(v1, v2);
+    }
+
+    #[test]
+    #[should_panic]
+    fn xorshift_zero_seed_panics() {
+        let _ = XorShift::new(0);
+    }
+}

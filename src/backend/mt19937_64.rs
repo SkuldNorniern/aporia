@@ -89,3 +89,16 @@ impl RandomBackend for MT19937_64 {
         y
     }
 } 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mt19937_64_generates_values() {
+        let mut mt = MT19937_64::new(5489);
+        let a = mt.next_u64();
+        let b = mt.next_u64();
+        assert_ne!(a, b);
+    }
+}

@@ -53,3 +53,16 @@ impl RandomBackend for SplitMix64 {
         z ^ (z >> 31)
     }
 } 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn splitmix64_basic_changes() {
+        let mut sm = SplitMix64::new(0);
+        let a = sm.next_u64();
+        let b = sm.next_u64();
+        assert_ne!(a, b);
+    }
+}

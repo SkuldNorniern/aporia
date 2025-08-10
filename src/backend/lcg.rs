@@ -54,3 +54,16 @@ impl RandomBackend for LCG {
         self.state
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn lcg_basic_progression() {
+        let mut lcg = LCG::new(12345);
+        let a = lcg.next_u64();
+        let b = lcg.next_u64();
+        assert_ne!(a, b);
+    }
+}

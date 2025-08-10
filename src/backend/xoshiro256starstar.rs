@@ -81,3 +81,16 @@ impl RandomBackend for Xoshiro256StarStar {
         result
     }
 } 
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn xoshiro256starstar_progresses() {
+        let mut xo = Xoshiro256StarStar::new(13579);
+        let a = xo.next_u64();
+        let b = xo.next_u64();
+        assert_ne!(a, b);
+    }
+}

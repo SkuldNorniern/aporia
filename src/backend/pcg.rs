@@ -68,3 +68,16 @@ impl RandomBackend for PCG {
         u64::from(xorshifted.rotate_right(rot))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pcg_basic_generation_changes_state() {
+        let mut pcg = PCG::new(42, 54);
+        let a = pcg.next_u64();
+        let b = pcg.next_u64();
+        assert_ne!(a, b);
+    }
+}
