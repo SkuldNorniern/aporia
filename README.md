@@ -1,8 +1,8 @@
 # Aporia
 
-**Aporia** is a Rust library that provides implementations of various random number generators (RNGs). With **Aporia**, the die is cast—bringing randomness to your Rust projects!
+Aporia is a small, dependency-free Rust RNG library with multiple backends and a consistent, ergonomic API. It favors clarity, correctness, and reproducibility. Not intended for cryptography.
 
-> Aporia (ἀπορία): A Greek term meaning "difficulty," "perplexity," or "impasse," reflecting the unpredictable and puzzling nature of randomness.
+> Aporia (ἀπορία): Greek for “difficulty,” “perplexity,” or “impasse.”
 
 ## Features
 
@@ -12,112 +12,131 @@
   - LCG (Linear Congruential Generator)
   - MT19937_64 (64-bit Mersenne Twister)
   - SplitMix64
-  - Xoshiro256\*\*\* (StarStar variant)
-- Simple and consistent API
-- Seedable generators for reproducible results
+  - Xoshiro256** (StarStar variant)
+- Consistent `Rng` wrapper API across backends
+- Unbiased integer ranges via zone rejection
+- Iterators over `u64`/`f64` and a `fill_bytes` helper
+- `no_std` support (with optional `std` feature)
 
 ## Installation
 
-Add Aporia to your `Cargo.toml`:
+Default (with `std` feature enabled):
 
 ```toml
 [dependencies]
-aporia = "0.1.0"
+aporia = "0.1.2"
 ```
 
-Then run:
+no_std (disable default `std` feature):
 
-```shell
-cargo build
+```toml
+[dependencies]
+aporia = { version = "0.1.2", default-features = false }
 ```
 
-## Usage
-
-Here's how to use different RNG backends with Aporia:
+## Quick start
 
 ```rust
-use aporia::{
-    backend::{LCG, MT19937_64, PCG, SplitMix64, XorShift, Xoshiro256StarStar},
-    Rng,
-};
+use aporia::{Rng, backend::XorShift};
 
 fn main() {
-    // Using PCG
-    let pcg = PCG::new(12345, 67890);
-    let mut rng1 = Rng::new(pcg);
-
-    // Using XorShift
-    let xorshift = XorShift::new(12345);
-    let mut rng2 = Rng::new(xorshift);
-
-    // Using LCG
-    let lcg = LCG::new(12345);
-    let mut rng3 = Rng::new(lcg);
-
-    // Using MT19937_64
-    let mt19937_64 = MT19937_64::new(12345);
-    let mut rng4 = Rng::new(mt19937_64);
-
-    // Using SplitMix64
-    let splitmix64 = SplitMix64::new(12345);
-    let mut rng5 = Rng::new(splitmix64);
-
-    // Using Xoshiro256StarStar
-    let xoshiro256starstar = Xoshiro256StarStar::new(12345);
-    let mut rng6 = Rng::new(xoshiro256starstar);
-
-    println!("PCG: {}", rng1.next_u64());
-    println!("XorShift: {}", rng2.next_u64());
-    println!("LCG: {}", rng3.next_u64());
-    println!("MT19937_64: {}", rng4.next_u64());
-    println!("SplitMix64: {}", rng5.next_u64());
-    println!("Xoshiro256StarStar: {}", rng6.next_u64());
+    let mut rng = Rng::new(XorShift::new(12345));
+    let n = rng.next_u64();
+    let x = rng.next_f64(); // in [0, 1)
+    println!("n = {n}, x = {x}");
 }
 ```
 
-## RNG Backends
+## Ranges without bias
 
-### PCG (Permuted Congruential Generator)
+The `Rng::gen_range(min, max)` method returns `Result<u64, AporiaError>`. It uses the unbiased “zone” rejection method to avoid modulo bias.
 
-A family of simple, fast, space-efficient, and statistically good algorithms for random number generation.
+```rust
+use aporia::{Rng, backend::XorShift};
 
-### XorShift
+fn sample_10_to_20() -> Result<u64, aporia::AporiaError> {
+    let mut rng = Rng::new(XorShift::new(1));
+    let v = rng.gen_range(10, 20)?; // returns Ok(10..20)
+    Ok(v)
+}
 
-A class of pseudorandom number generators that use XOR and shift bitwise operations.
+fn sample_floats() -> Result<f64, aporia::AporiaError> {
+    let mut rng = Rng::new(XorShift::new(2));
+    let v = rng.gen_range_f64(0.0, 1.0)?; // Ok([0.0, 1.0))
+    Ok(v)
+}
+```
 
-### LCG (Linear Congruential Generator)
+If bounds are guaranteed valid at the call site, using `expect` is acceptable:
 
-One of the oldest and best-known pseudorandom number generator algorithms.
+```rust
+use aporia::{Rng, backend::XorShift};
 
-### MT19937_64 (64-bit Mersenne Twister)
+let mut rng = Rng::new(XorShift::new(7));
+// Bounds are known-valid here; expecting success is safe.
+let v = rng.gen_range(100, 200).expect("min < max holds by construction");
+```
 
-A widely used pseudorandom number generator known for its high period and equidistribution properties.
+## Iterators and bytes
 
-### SplitMix64
+```rust
+use aporia::{Rng, backend::SplitMix64};
 
-A fast, non-cryptographic PRNG with a large period and good statistical properties.
+let mut rng = Rng::new(SplitMix64::new(123));
 
-### Xoshiro256\*\*\* (StarStar variant)
+// Take some u64s
+let sum: u64 = rng.iter_u64().take(5).sum();
 
-A state-of-the-art generator suitable for most applications except cryptography.
+// Iterate f64s in [0,1)
+let mut avg = 0.0;
+for (i, x) in rng.iter_f64().take(10).enumerate() {
+    avg = (avg * i as f64 + x) / (i as f64 + 1.0);
+}
+
+// Fill a byte buffer
+let mut buf = [0u8; 32];
+rng.fill_bytes(&mut buf);
+```
+
+## Backends at a glance
+
+- XorShift: very fast, tiny state, simple
+- PCG: fast, statistically strong for general use
+- LCG: very simple, good for basic use
+- MT19937_64: high quality, very long period, large state
+- SplitMix64: very fast, good initializer for other RNGs
+- Xoshiro256**: modern, high quality, very fast
+
+## Error handling
+
+The crate uses a small custom error enum:
+
+```rust
+#[derive(Debug, Clone, PartialEq)]
+pub enum AporiaError {
+    InvalidRangeU64 { min: u64, max: u64 },
+    InvalidRangeF64 { min: f64, max: f64 },
+    InvalidSeed(&'static str),
+}
+```
+
+Examples of `Result`-based APIs:
+- `Rng::gen_range(min, max) -> Result<u64, AporiaError>`
+- `Rng::gen_range_f64(min, max) -> Result<f64, AporiaError>`
+- `XorShift::try_new(seed) -> Result<XorShift, AporiaError>`
+
+When `std` feature is enabled (default), `AporiaError` implements `std::error::Error`.
+
+## no_std
+
+- The crate supports `#![no_std]` when built with `default-features = false`.
+- All core APIs are available; printing and OS entropy are not provided by this crate.
+
+## Stability
+
+For a given backend and seed, sequences are intended to remain stable across patch/minor versions.
+
 
 ## Contributing
 
-Contributions are welcome! If you have ideas for improvements or encounter any issues, please open an issue or submit a pull request.
-
-## License
-
-This project is licensed under the MIT License.
-
-## Acknowledgements
-
-- Inspired by various RNG implementations and algorithms.
-- Thanks to the Rust community for their support.
-
-## Contact
-
-For any questions or suggestions, feel free to contact the project maintainer.
-
----
-
-With **Aporia**, take a chance on randomness—you won't have to roll the dice on reliability!
+Contributions are welcome. Please open an issue or PR for bugs or enhancements.
