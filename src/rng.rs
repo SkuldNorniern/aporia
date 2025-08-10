@@ -172,6 +172,55 @@ where
     }
 }
 
+/// Iterator over `u64` values from a mutable `Rng` reference.
+#[derive(Debug)]
+pub struct U64Iter<'a, B: RandomBackend> {
+    rng: &'a mut Rng<B>,
+}
+
+impl<'a, B: RandomBackend> Iterator for U64Iter<'a, B> {
+    type Item = u64;
+    fn next(&mut self) -> Option<Self::Item> {
+        Some(self.rng.next_u64())
+    }
+}
+
+/// Iterator over `f64` values in [0, 1) from a mutable `Rng` reference.
+#[derive(Debug)]
+pub struct F64Iter<'a, B: RandomBackend> {
+    rng: &'a mut Rng<B>,
+}
+
+impl<'a, B: RandomBackend> Iterator for F64Iter<'a, B> {
+    type Item = f64;
+    fn next(&mut self) -> Option<Self::Item> {
+        Some(self.rng.next_f64())
+    }
+}
+
+impl<B: RandomBackend> Rng<B> {
+    /// Returns an iterator that yields `u64` values indefinitely.
+    #[inline]
+    pub fn iter_u64(&mut self) -> U64Iter<'_, B> {
+        U64Iter { rng: self }
+    }
+
+    /// Returns an iterator that yields `f64` values in [0, 1) indefinitely.
+    #[inline]
+    pub fn iter_f64(&mut self) -> F64Iter<'_, B> {
+        F64Iter { rng: self }
+    }
+}
+
+impl<'a, B: RandomBackend> IntoIterator for &'a mut Rng<B> {
+    type Item = u64;
+    type IntoIter = U64Iter<'a, B>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_u64()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -215,5 +264,30 @@ mod tests {
         let f = rng.next_f32();
         assert!(f >= 0.0 && f < 1.0);
         let _b = rng.next_bool();
+    }
+
+    #[test]
+    fn iter_helpers_and_into_iter() {
+        let backend = XorShift::new(1);
+        let mut rng = Rng::new(backend);
+        // iter_u64 produces values
+        let mut it = rng.iter_u64();
+        let a = it.next().unwrap();
+        let b = it.next().unwrap();
+        assert_ne!(a, b);
+
+        // iter_f64 produces values in [0,1)
+        let x = rng.iter_f64().next().unwrap();
+        assert!(x >= 0.0 && x < 1.0);
+
+        // IntoIterator for &mut Rng<B> yields u64s
+        let backend2 = XorShift::new(2);
+        let mut rng2 = Rng::new(backend2);
+        let mut count = 0usize;
+        for _ in &mut rng2 { // uses IntoIterator for &mut Rng<B>
+            count += 1;
+            if count > 4 { break; }
+        }
+        assert!(count > 0);
     }
 }
