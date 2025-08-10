@@ -1,5 +1,14 @@
 //! Random number generator backend implementations.
 //!
+//! This module defines the core RNG backend trait [`RandomBackend`] and re-exports
+//! a set of concrete algorithms. Each backend is small, dependency-free, and focuses
+//! on clarity and correctness. These are not cryptographic RNGs.
+//!
+//! Highlights:
+//! - Minimal trait surface with sensible defaults: `next_u64`, `next_u32`, `next_f64`, `fill_bytes`
+//! - Multiple algorithms with different trade-offs (speed, state size, quality)
+//! - Designed to be used through the high-level [`crate::Rng`] wrapper
+//!
 //! This module provides various random number generator (RNG) implementations with different
 //! characteristics and trade-offs. Each backend implements the [`RandomBackend`] trait,
 //! allowing them to be used interchangeably.
@@ -89,8 +98,6 @@ pub trait RandomBackend {
     /// Generates the next 64-bit unsigned integer.
     ///
     /// This is the core method that must be implemented by all backends.
-    #[inline]
-    #[must_use]
     fn next_u64(&mut self) -> u64;
 
     /// Generates a random floating-point number in the range [0, 1).
@@ -100,8 +107,6 @@ pub trait RandomBackend {
     ///
     /// Using the upper 53 bits ensures the value is in [0, 1) and matches the
     /// precision of `f64` mantissa, avoiding the possibility of returning 1.0.
-    #[inline]
-    #[must_use]
     fn next_f64(&mut self) -> f64 {
         // Take the top 53 bits to construct an f64 in [0, 1).
         // 53 is the number of mantissa bits in an f64.
@@ -112,14 +117,12 @@ pub trait RandomBackend {
     /// Generates the next 32-bit unsigned integer.
     ///
     /// Default implementation returns the upper 32 bits of `next_u64()`.
-    #[inline]
-    #[must_use]
     fn next_u32(&mut self) -> u32 {
         (self.next_u64() >> 32) as u32
     }
 
     /// Fills `buf` with random bytes using repeated `next_u64()` calls.
-    #[inline]
+    /// The tail shorter than 8 bytes is handled with a final partial copy.
     fn fill_bytes(&mut self, buf: &mut [u8]) {
         let mut i = 0;
         let len = buf.len();

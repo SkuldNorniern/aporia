@@ -4,6 +4,12 @@
 //! with multiple backend implementations. It allows users to choose different RNG
 //! algorithms while maintaining a consistent interface.
 //!
+//! Design goals:
+//! - Small, dependency-free core
+//! - Clear separation between algorithm backends and the user-facing `Rng`
+//! - Ergonomic helpers (`next_*`, `gen_range`, `fill_bytes`) and iterators
+//! - Deterministic, reproducible sequences given the same seed
+//!
 //! # Features
 //! 
 //! - Multiple RNG backend implementations

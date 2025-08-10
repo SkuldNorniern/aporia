@@ -1,4 +1,11 @@
 //! The main RNG wrapper type that provides a consistent interface across backends.
+//!
+//! This type offers convenience methods on top of backends that implement
+//! [`crate::backend::RandomBackend`], including `next_u64`, `next_u32`, `next_f64`,
+//! `next_f32`, `next_bool`, unbiased `gen_range`, and byte-filling utilities.
+//! It also provides lightweight iterators over `u64` and `f64` values.
+//!
+//! Note: These generators are not intended for cryptographic purposes.
 
 use crate::backend::RandomBackend;
 
@@ -21,6 +28,24 @@ use crate::backend::RandomBackend;
 ///
 /// let random_number = rng.next_u64();
 /// let random_float = rng.next_f64();
+/// ```
+///
+/// Iterators and helpers:
+/// ```rust
+/// use aporia::{Rng, backend::XorShift};
+/// let mut rng = Rng::new(XorShift::new(1));
+/// 
+/// // Take 3 u64 values
+/// let count = rng.iter_u64().take(3).count();
+/// assert_eq!(count, 3);
+/// 
+/// // Use for-loop via IntoIterator for &mut Rng to consume a few values
+/// let mut n = 0usize;
+/// for _ in &mut rng {
+///     n += 1;
+///     if n == 4 { break; }
+/// }
+/// assert_eq!(n, 4);
 /// ```
 pub struct Rng<B: RandomBackend> {
     backend: B,
@@ -67,6 +92,8 @@ impl<B: RandomBackend> Rng<B> {
     }
 
     /// Generates the next 32-bit floating point number in [0, 1).
+    ///
+    /// Uses the upper 24 bits of a `u64` sample to match `f32` mantissa width.
     #[inline]
     #[must_use]
     pub fn next_f32(&mut self) -> f32 {
@@ -146,6 +173,16 @@ impl<B: RandomBackend> Rng<B> {
     }
 
     /// Fills `buf` with random bytes from the backend.
+    ///
+    /// This is a convenience wrapper around [`RandomBackend::fill_bytes`].
+    ///
+    /// ```rust
+    /// use aporia::{Rng, backend::XorShift};
+    /// let mut rng = Rng::new(XorShift::new(1));
+    /// let mut bytes = [0u8; 16];
+    /// rng.fill_bytes(&mut bytes);
+    /// // `bytes` now contains pseudorandom data
+    /// ```
     #[inline]
     pub fn fill_bytes(&mut self, buf: &mut [u8]) {
         self.backend.fill_bytes(buf)
