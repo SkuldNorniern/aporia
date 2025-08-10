@@ -95,6 +95,14 @@ impl<B: RandomBackend> Rng<B> {
     /// # Panics
     ///
     /// Panics if `min >= max`
+    ///
+    /// # Notes
+    ///
+    /// Uses the unbiased "zone" rejection method to avoid modulo bias.
+    /// Let `range = max - min`. Compute `zone = u64::MAX - (u64::MAX % range)`,
+    /// which is the largest multiple of `range` that fits in a `u64`.
+    /// Draw 64-bit values until `v < zone`, then return `min + (v % range)`.
+    /// Because `zone` is an exact multiple of `range`, the modulo is uniform.
     #[inline]
     #[must_use]
     pub fn gen_range(&mut self, min: u64, max: u64) -> u64 {
@@ -102,6 +110,7 @@ impl<B: RandomBackend> Rng<B> {
             panic!("min must be less than max");
         }
         let range = max - min;
+        // Unbiased zone rejection method
         let zone = u64::MAX - (u64::MAX % range);
         loop {
             let v = self.next_u64();
