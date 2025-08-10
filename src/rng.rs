@@ -1,7 +1,6 @@
 //! The main RNG wrapper type that provides a consistent interface across backends.
 
 use crate::backend::RandomBackend;
-use std::marker::PhantomData;
 
 /// A random number generator that works with any backend implementing [`RandomBackend`].
 ///
@@ -25,7 +24,6 @@ use std::marker::PhantomData;
 /// ```
 pub struct Rng<B: RandomBackend> {
     backend: B,
-    _phantom: PhantomData<B>,
 }
 
 impl<B: RandomBackend> Rng<B> {
@@ -35,10 +33,7 @@ impl<B: RandomBackend> Rng<B> {
     ///
     /// * `backend` - The RNG backend to use
     pub fn new(backend: B) -> Self {
-        Self {
-            backend,
-            _phantom: PhantomData,
-        }
+        Self { backend }
     }
 
     /// Generates the next 64-bit unsigned integer.
