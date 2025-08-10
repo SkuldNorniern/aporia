@@ -212,7 +212,7 @@ pub struct U64Iter<'a, B: RandomBackend> {
     rng: &'a mut Rng<B>,
 }
 
-impl<'a, B: RandomBackend> Iterator for U64Iter<'a, B> {
+impl<B: RandomBackend> Iterator for U64Iter<'_, B> {
     type Item = u64;
     fn next(&mut self) -> Option<Self::Item> {
         Some(self.rng.next_u64())
@@ -225,7 +225,7 @@ pub struct F64Iter<'a, B: RandomBackend> {
     rng: &'a mut Rng<B>,
 }
 
-impl<'a, B: RandomBackend> Iterator for F64Iter<'a, B> {
+impl<B: RandomBackend> Iterator for F64Iter<'_, B> {
     type Item = f64;
     fn next(&mut self) -> Option<Self::Item> {
         Some(self.rng.next_f64())
@@ -266,7 +266,7 @@ mod tests {
         let mut rng = Rng::new(backend);
         for _ in 0..1000 {
             let x = rng.next_f64();
-            assert!(x >= 0.0 && x < 1.0);
+            assert!((0.0..1.0).contains(&x));
         }
     }
 
@@ -286,7 +286,7 @@ mod tests {
         let mut rng = Rng::new(backend);
         for _ in 0..1000 {
             let x = rng.gen_range_f64(0.5, 1.5).unwrap();
-            assert!(x >= 0.5 && x < 1.5);
+            assert!((0.5..1.5).contains(&x));
         }
     }
 
@@ -296,7 +296,7 @@ mod tests {
         let mut rng = Rng::new(backend);
         let _u32v = rng.next_u32();
         let f = rng.next_f32();
-        assert!(f >= 0.0 && f < 1.0);
+        assert!((0.0..1.0).contains(&f));
         let _b = rng.next_bool();
     }
 
@@ -312,7 +312,7 @@ mod tests {
 
         // iter_f64 produces values in [0,1)
         let x = rng.iter_f64().next().unwrap();
-        assert!(x >= 0.0 && x < 1.0);
+        assert!((0.0..1.0).contains(&x));
 
         // IntoIterator for &mut Rng<B> yields u64s
         let backend2 = XorShift::new(2);
