@@ -40,11 +40,19 @@ impl XorShift {
     ///
     /// * `seed` - The initial seed value.
     ///
-    /// # Panics
-    ///
-    /// Panics if the seed is zero, as zero is an invalid state for the XorShift algorithm.
+    /// Returns a new `XorShift` instance, or an error if the seed is invalid.
+    pub fn try_new(seed: u64) -> core::result::Result<Self, crate::AporiaError> {
+        if seed == 0 {
+            return Err(crate::AporiaError::InvalidSeed("XorShift seed must be non-zero"));
+        }
+        Ok(Self { state: seed })
+    }
+
+    /// Creates a new `XorShift` and will panic on invalid seed.
+    /// Only use when the seed is known-nonzero at call site.
     pub fn new(seed: u64) -> Self {
-        assert!(seed != 0, "Seed value cannot be zero.");
+        // Safety: caller guarantees seed != 0 to avoid invalid state.
+        if seed == 0 { panic!("invalid zero seed for XorShift"); }
         Self { state: seed }
     }
 }
@@ -77,8 +85,7 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
     fn xorshift_zero_seed_panics() {
-        let _ = XorShift::new(0);
+        assert!(XorShift::try_new(0).is_err());
     }
 }

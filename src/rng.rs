@@ -131,10 +131,9 @@ impl<B: RandomBackend> Rng<B> {
     /// Draw 64-bit values until `v < zone`, then return `min + (v % range)`.
     /// Because `zone` is an exact multiple of `range`, the modulo is uniform.
     #[inline]
-    #[must_use]
-    pub fn gen_range(&mut self, min: u64, max: u64) -> u64 {
+    pub fn gen_range(&mut self, min: u64, max: u64) -> core::result::Result<u64, crate::AporiaError> {
         if min >= max {
-            panic!("min must be less than max");
+            return Err(crate::AporiaError::InvalidRangeU64 { min, max });
         }
         let range = max - min;
         // Unbiased zone rejection method
@@ -142,7 +141,7 @@ impl<B: RandomBackend> Rng<B> {
         loop {
             let v = self.next_u64();
             if v < zone {
-                return min + (v % range);
+                break Ok(min + (v % range));
             }
         }
     }
@@ -162,14 +161,12 @@ impl<B: RandomBackend> Rng<B> {
     ///
     /// Panics if `min >= max`
     #[inline]
-    #[must_use]
-    pub fn gen_range_f64(&mut self, min: f64, max: f64) -> f64 {
+    pub fn gen_range_f64(&mut self, min: f64, max: f64) -> core::result::Result<f64, crate::AporiaError> {
         if min >= max {
-            panic!("min must be less than max");
+            return Err(crate::AporiaError::InvalidRangeF64 { min, max });
         }
-        
         let rand = self.next_f64();
-        min + (rand * (max - min))
+        Ok(min + (rand * (max - min)))
     }
 
     /// Fills `buf` with random bytes from the backend.
@@ -278,7 +275,7 @@ mod tests {
         let backend = SplitMix64::new(123);
         let mut rng = Rng::new(backend);
         for _ in 0..1000 {
-            let x = rng.gen_range(10, 20);
+            let x = rng.gen_range(10, 20).unwrap();
             assert!((10..20).contains(&x));
         }
     }
@@ -288,7 +285,7 @@ mod tests {
         let backend = SplitMix64::new(123);
         let mut rng = Rng::new(backend);
         for _ in 0..1000 {
-            let x = rng.gen_range_f64(0.5, 1.5);
+            let x = rng.gen_range_f64(0.5, 1.5).unwrap();
             assert!(x >= 0.5 && x < 1.5);
         }
     }

@@ -65,6 +65,33 @@ mod rng;
 pub use backend::RandomBackend;
 pub use rng::Rng;
 
+/// Errors produced by this crate.
+#[derive(Debug, Clone, PartialEq)]
+pub enum AporiaError {
+    /// The provided integer range is invalid (min >= max).
+    InvalidRangeU64 { min: u64, max: u64 },
+    /// The provided floating-point range is invalid (min >= max).
+    InvalidRangeF64 { min: f64, max: f64 },
+    /// The provided seed is invalid for the backend (e.g., zero for XorShift).
+    InvalidSeed(&'static str),
+}
+
+impl core::fmt::Display for AporiaError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            AporiaError::InvalidRangeU64 { min, max } => {
+                write!(f, "invalid u64 range: min ({}) must be < max ({})", min, max)
+            }
+            AporiaError::InvalidRangeF64 { min, max } => {
+                write!(f, "invalid f64 range: min ({}) must be < max ({})", min, max)
+            }
+            AporiaError::InvalidSeed(reason) => write!(f, "invalid seed: {}", reason),
+        }
+    }
+}
+
+impl std::error::Error for AporiaError {}
+
 #[cfg(test)]
 mod tests {
     use super::*;
