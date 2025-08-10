@@ -15,7 +15,7 @@ use std::marker::PhantomData;
 /// # Examples
 ///
 /// ```rust
-/// use alea::{Rng, backend::XorShift};
+/// use aporia::{Rng, backend::XorShift};
 ///
 /// let backend = XorShift::new(12345);
 /// let mut rng = Rng::new(backend);

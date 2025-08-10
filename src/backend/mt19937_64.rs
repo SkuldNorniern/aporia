@@ -14,7 +14,7 @@
 //! # Example
 //!
 //! ```rust
-//! use alea::{Rng, backend::MT19937_64};
+//! use aporia::{Rng, backend::MT19937_64};
 //!
 //! let backend = MT19937_64::new(5489); // Default seed from reference implementation
 //! let mut rng = Rng::new(backend);

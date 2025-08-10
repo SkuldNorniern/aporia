@@ -13,7 +13,7 @@
 //! # Example
 //!
 //! ```rust
-//! use alea::{Rng, backend::Xoshiro256StarStar};
+//! use aporia::{Rng, backend::Xoshiro256StarStar};
 //!
 //! let backend = Xoshiro256StarStar::new(13579);
 //! let mut rng = Rng::new(backend);

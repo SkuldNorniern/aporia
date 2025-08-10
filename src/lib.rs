@@ -14,7 +14,7 @@
 //! # Examples
 //!
 //! ```rust
-//! use alea::{Rng, backend::XorShift};
+//! use aporia::{Rng, backend::XorShift};
 //!
 //! // Create a new RNG with the XorShift backend
 //! let backend = XorShift::new(12345);
@@ -39,7 +39,7 @@
 //! To implement a custom backend, implement the `RandomBackend` trait:
 //!
 //! ```rust
-//! use alea::RandomBackend;
+//! use aporia::RandomBackend;
 //!
 //! struct MyBackend {
 //!     state: u64,

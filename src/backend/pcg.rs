@@ -13,7 +13,7 @@
 //! # Example
 //!
 //! ```rust
-//! use alea::{Rng, backend::PCG};
+//! use aporia::{Rng, backend::PCG};
 //!
 //! let backend = PCG::new(42, 54); // Seed and sequence values
 //! let mut rng = Rng::new(backend);

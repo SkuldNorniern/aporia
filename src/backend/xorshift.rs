@@ -13,7 +13,7 @@
 //! # Example
 //!
 //! ```rust
-//! use alea::{Rng, backend::XorShift};
+//! use aporia::{Rng, backend::XorShift};
 //!
 //! let backend = XorShift::new(987654321);
 //! let mut rng = Rng::new(backend);

@@ -29,7 +29,7 @@
 //! # Examples
 //!
 //! ```rust
-//! use alea::{Rng, backend::XorShift};
+//! use aporia::{Rng, backend::XorShift};
 //!
 //! // Create a new RNG with XorShift backend
 //! let backend = XorShift::new(12345);
@@ -72,7 +72,7 @@ mod xoshiro256starstar;
 /// # Examples
 ///
 /// ```rust
-/// use alea::RandomBackend;
+/// use aporia::RandomBackend;
 ///
 /// struct MyBackend {
 ///     state: u64

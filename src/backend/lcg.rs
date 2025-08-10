@@ -13,7 +13,7 @@
 //! # Example
 //!
 //! ```rust
-//! use alea::{Rng, backend::LCG};
+//! use aporia::{Rng, backend::LCG};
 //!
 //! let backend = LCG::new(12345);
 //! let mut rng = Rng::new(backend);

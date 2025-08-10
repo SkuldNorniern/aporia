@@ -13,7 +13,7 @@
 //! # Example
 //!
 //! ```rust
-//! use alea::{Rng, backend::SplitMix64};
+//! use aporia::{Rng, backend::SplitMix64};
 //!
 //! let backend = SplitMix64::new(123456789);
 //! let mut rng = Rng::new(backend);
